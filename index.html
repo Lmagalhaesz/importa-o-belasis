@@ -3,36 +3,63 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Importação de Planilhas - Belasis</title>
+  <title>Importação Belasis - Download CSV</title>
 </head>
-<body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f7f7f7;">
-  <h2>Importação de Planilhas</h2>
+<body style="font-family: Arial, sans-serif; background-color: #f7f7f7; padding: 50px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;">
 
-  <form 
-    action="https://leofreesemagalhaes2006.app.n8n.cloud/webhook-test/importacao-cliente" 
-    method="POST" 
-    enctype="multipart/form-data" 
-    style="background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); max-width: 500px;"
+  <h2 style="margin-bottom: 20px;">Arquivo Pronto para Baixar!</h2>
+
+  <button 
+    id="downloadButton"
+    style="padding: 15px 30px; background-color: #4CAF50; color: white; font-size: 18px; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s;"
   >
-    <label for="file">Selecionar Planilha:</label><br><br>
-    <input type="file" name="file" required><br><br>
+    📥 Baixar CSV Corrigido
+  </button>
 
-    <label for="type">Tipo de Importação:</label><br><br>
-    <select name="type" required>
-      <option value="clientes">Clientes</option>
-      <option value="serviços">Serviços</option>
-      <option value="produtos">Produtos</option>
-      <option value="profissionais">Profissionais</option>
-    </select><br><br>
+  <script>
+    const webhookUrl = "https://SEU-WEBHOOK-PROD.n8n.cloud/webhook/importacao-clientes"; // coloque aqui sua URL de produção
+    const nomeArquivo = "importacao_clientes_21557.csv"; // Nome final do arquivo que será baixado
 
-    <button 
-      type="submit" 
-      style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;"
-    >
-      Enviar Planilha
-    </button>
-  </form>
+    document.getElementById('downloadButton').addEventListener('click', async () => {
+      try {
+        const formData = new FormData();
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.csv, .xlsx, .xls, .ods';
+        
+        fileInput.onchange = async () => {
+          const file = fileInput.files[0];
+          if (!file) return;
 
-  <p style="margin-top: 20px;">Após o envio, o sistema processará a planilha automaticamente.</p>
+          formData.append('file', file);
+          formData.append('type', 'Clientes'); // exemplo fixo ou capturado de outro campo
+
+          const response = await fetch(webhookUrl, {
+            method: 'POST',
+            body: formData
+          });
+
+          if (!response.ok) {
+            throw new Error('Erro ao processar o arquivo.');
+          }
+
+          const blob = await response.blob();
+          const blobUrl = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = blobUrl;
+          a.download = nomeArquivo;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        };
+
+        fileInput.click();
+      } catch (error) {
+        console.error('Erro:', error);
+        alert('Erro ao gerar o arquivo.');
+      }
+    });
+  </script>
+
 </body>
 </html>
