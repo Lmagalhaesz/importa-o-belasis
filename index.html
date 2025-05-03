@@ -1,66 +1,72 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Importação Belasis - Download CSV</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Importação Belasis - Download Arquivo</title>
 </head>
 <body style="font-family: Arial, sans-serif; background-color: #f7f7f7; padding: 50px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;">
 
-  <h2 style="margin-bottom: 20px;">Arquivo Pronto para Baixar!</h2>
+  <h2 style="margin-bottom: 20px;">Selecione um tipo de importação</h2>
 
   <button 
-    id="downloadButton"
-    style="padding: 15px 30px; background-color: #4CAF50; color: white; font-size: 18px; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s;"
+    id="btnClientes"
+    style="margin: 10px; padding: 15px 30px; background-color: #4CAF50; color: white; font-size: 18px; border: none; border-radius: 8px; cursor: pointer;"
   >
-    📥 Baixar CSV Corrigido
+    📥 Baixar Arquivo Corrigido - Clientes
+  </button>
+
+  <button 
+    id="btnServicos"
+    style="margin: 10px; padding: 15px 30px; background-color: #2196F3; color: white; font-size: 18px; border: none; border-radius: 8px; cursor: pointer;"
+  >
+    📥 Baixar Arquivo Corrigido - Serviços
   </button>
 
   <script>
-    const webhookUrl = "https://proxy-with-vercel.vercel.app/"; // coloque aqui sua URL de produção
-    const nomeArquivo = "importacao_clientes_f.xlsx"; // Nome final do arquivo que será baixado
+    const webhookUrl = "https://proxy-with-vercel.vercel.app/";
 
-    document.getElementById('downloadButton').addEventListener('click', async () => {
+    async function handleDownload(tipo) {
       try {
-        const formData = new FormData();
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
         fileInput.accept = '.csv, .xlsx, .xls, .ods';
-        
+
         fileInput.onchange = async () => {
           const file = fileInput.files[0];
           if (!file) return;
 
+          const formData = new FormData();
           formData.append('file', file);
-          formData.append('type', 'Clientes'); // exemplo fixo ou capturado de outro campo
+          formData.append('type', tipo);
 
           const response = await fetch(webhookUrl, {
             method: 'POST',
             body: formData
           });
 
-          console.log(response);
-
-          if (!response.ok) {
-            throw new Error('Erro ao processar o arquivo.');
-          }
+          if (!response.ok) throw new Error('Erro ao processar o arquivo.');
 
           const blob = await response.blob();
           const blobUrl = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = blobUrl;
-          a.download = nomeArquivo;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
+
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = `importacao_${tipo.toLowerCase()}_f.xlsx`;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
         };
 
         fileInput.click();
-      } catch (error) {
-        console.error('Erro:', error);
+      } catch (err) {
+        console.error(err);
         alert('Erro ao gerar o arquivo.');
       }
-    });
+    }
+
+    document.getElementById('btnClientes').addEventListener('click', () => handleDownload('Clientes'));
+    document.getElementById('btnServicos').addEventListener('click', () => handleDownload('Servicos'));
   </script>
 
 </body>
