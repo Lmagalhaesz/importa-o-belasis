@@ -45,6 +45,12 @@
             body: formData
           });
 
+          console.log("STATUS FETCH", response);
+          if (!response.ok) {
+            throw new Error('Erro ao processar o arquivo.');
+          }
+
+
           if (!response.ok) throw new Error('Erro ao processar o arquivo.');
 
           const blob = await response.blob();
