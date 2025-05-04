@@ -65,7 +65,7 @@
 
           const link = document.createElement('a');
           link.href = blobUrl;
-          link.download = `importacao_${tipo.toLowerCase()}_f.xlsx`;
+          link.download = `importacao_${tipo.toLowerCase()}_f.csv`;
           document.body.appendChild(link);
           link.click();
           link.remove();
